@@ -23,6 +23,17 @@ app.get('/get-all-users',(req,res)=>{
     })
 })
 
+//fetching particular user
+app.get('/get-user/:id',(req,res)=>{
+    const id = req.params.id;
+    const index = data.findIndex(index => index.id == id);
+    if(index == -1){
+        return res.status(404).json({error:"User not found"})
+    }
+    return res.status(200).json(data[index]);
+})
+
+
 // adding data
 app.post('/add-user',(req,res)=>{
     const user = req.body;
@@ -104,6 +115,23 @@ app.patch('/update-many/:id',(req,res)=>{
     
 })
 
+// deleting user
+app.delete('/delete/:id',(req,res)=>{
+    const id = req.params.id;
+    const index = data.findIndex( index=> index.id == id )
+    if(index == -1){
+        return res.status(404).json({ error:"User not found" })
+    }
+    data.splice(index,1)
+    fs.writeFile('MOCK_DATA.json',JSON.stringify(data),(err)=>{
+        if(err){
+            return res.status(404).json({ error:"error while deleting user" })
+        }
+        return res.status(200).json({
+            message:"user deleted successfully",
+        })
+    })
+})
 
 app.listen(port,()=>{
     console.log(`server listen at ${port}`);
