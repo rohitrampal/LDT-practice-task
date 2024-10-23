@@ -9,7 +9,21 @@ let filterOut = document.getElementById('filterOut');
 
 
 let previousData = document.createElement('li');
-
+let populateData = document.querySelector('.previous-data');
+//-------------populate when load
+window.addEventListener('load', function(){
+    let localData = localStorage.getItem('data')
+    let parseData = JSON.parse(localData)
+    previousData.style.listStyle = "none"
+    parseData.forEach(element => {
+        if( element.text  && element.date ){
+            let t = `<p>${element.text}</p>`
+            previousData.innerHTML += t
+        }
+    })
+    populateData.append(previousData)
+})
+//+++++++++++++++++++
 filter.addEventListener('click',()=>{
     document.querySelector('.filter').style.display = 'block'
     document.querySelector('#filter').style.display = 'none'
@@ -43,7 +57,7 @@ addToDo.addEventListener('click',()=>{
     let text = inputText.value;
     let date = new Date()
     // console.log(text,date);
-    
+    populateData.innerHTML = ""
     let li = document.createElement('li');
     let newText = `
         <input type="text" disabled class="newText" name="newText" value="${text}"/> 
