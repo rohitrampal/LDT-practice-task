@@ -5,12 +5,13 @@
   "main": "app.js",
   "scripts": {
     "test": "app.js",
-    "start":"nodemon app.js"
+    "start": "nodemon app.js"
   },
   "author": "techi",
   "license": "ISC",
   "dependencies": {
     "express": "^4.21.1",
+    "mongoose": "^8.7.2",
     "nodemon": "^3.1.7"
   }
 }

@@ -19,5 +19,11 @@ router.patch('/update-many/:id',UserController.updateMultipleDetails)
 // updating all usser details
 router.put('/update-all/:id',UserController.updateUser)
 
+// get particular user
+router.get('/get-user/:id',UserController.getUser);
+
+// delete user
+router.delete('/delete/:id',UserController.deleteUser);
+
 
 module.exports = router;
