@@ -1,8 +1,9 @@
-const fs = require('fs');
-const data = require('../MOCK_DATA.json');
+// const fs = require('fs');
+// const data = require('../MOCK_DATA.json');
 const User = require('../models/user.model.js')
 // const data = require('../models/MOCK_DATA.json')
-const ApiError = require('../utils/ApiError.js')
+const ApiError = require('../utils/ApiError.js');
+const  ApiResponse  = require('../utils/ApiResponse.js');
 
 class UserController{
 // fetching all user details
@@ -20,15 +21,13 @@ class UserController{
 
 // get particular user
     static getUser = async(req,res)=>{
-        const id = req.params.id;
-        console.log(id);
-        
+        const id = req.params.id;        
         try {
             const user = await User.find({ id:id })
             
             if(!user){
-                // throw new ApiError(404,"users not found");
-                return res.status(404).json({ error:"User not found" })
+                throw new ApiError(404,"users not found");
+                // return res.status(404).json({ error:"User not found" })
             }
             return res.status(200).json(user);
         } catch (error) {
@@ -38,100 +37,124 @@ class UserController{
     }
 
 // adding data
-    static addUser  = (req,res)=>{
-        const user = req.body;
-        data.push(user)
-        fs.writeFile('MOCK_DATA.json',JSON.stringify(data),(err)=>{
-            if(err){
-                return res.status(404).json({ error:err })
+    static addUser  = async(req,res)=>{
+        console.log(req.body);
+        
+        const { id, first_name, last_name, email } = req.body;
+        try {
+            
+            if( email==="" && id ==="" && !email ){
+                throw new ApiError( 404,"field should not be empty" );
             }
-            // fs.close();
+            
+            const existedUser = await User.findOne( {email} )
+            
+            if(existedUser){
+                throw new ApiError( 400,"Email already exists" );
+            }
+
+
+            await  User.create({
+                id,
+                email,
+                first_name,
+                last_name
+            });
             return res.status(200).json({
                 message:"User added successfully",
             });
-        })
+        } catch (error) {
+            throw new ApiError(500,"server error");
+            
+        }
 
 
     }
 // updating user email 
-    static updateUserEmail = (req,res)=>{
+    static updateUserEmail = async(req,res)=>{
         const id = req.params.id;
         const { email } = req.body;
+        // console.log(email);
         
-        for(let  i=0;i<data.length;i++){
-            if( data[i].id == id ){
-                data[i].email = email;
-                fs.writeFile('MOCK_DATA.json',JSON.stringify(data),(err)=>{
-                    if(err){
-                        return res.status(404).json({ error:err })
-                    }
-                    return res.status(200).json({
-                        message:"user email updated",
-                    })
-                })
-                break;
+        try {
+            const isExist = await User.findOne({ id:id });
+            if(!isExist){
+                throw new ApiError(404,"User not found");
             }
+            const updateEmail = await User.updateOne({id:id},[ {$set:{email:email}} ])
+            return res.status(200).json({
+                message:"email id updated successfully"
+            })
+        } catch (error) {
+            throw new ApiError(500 , "error from server");
         }
+        
     }
     
 // updating all usser details
-    static updateUser = (req,res)=>{
-        const id = req.params.id;
-        const user = req.body;
-        const index = data.findIndex( index=> index.id == id )
-        if(index == -1){
-            return res.status(404).json({ error:"User not found" })
-        }
-        data[index] = user
-        fs.writeFile('MOCK_DATA.json',JSON.stringify(data),(err)=>{
-            if(err){
-                return res.status(404).json({error:"error while writting file"})
+    static updateUser = async(req,res)=>{
+        const userId = req.params.id;
+        const { id,email,first_name,last_name } = req.body;
+        try {
+            const isExist = await User.findOne({id:userId});
+            if(!isExist){
+                throw new ApiError(404,"User not found");
             }
+            await User.updateOne({id:userId},{$set:{
+                id:id,
+                email:email,
+                first_name:first_name,
+                last_name:last_name
+            }})
             return res.status(200).json({
-                message:"user updated successfully",
+                message:"user updated successfully"
             })
-        })
+        } catch (error) {
+            throw new ApiError(500,"server error")
+        }
         
     }
 
 //updating multiple details at a time
-    static updateMultipleDetails = (req,res)=>{
-        const id = req.params.id;
-        const user = req.body;
-        const index = data.findIndex( index=> index.id == id )
-        if(index == -1){
-            return res.status(404).json({ error:"User not found" })
-        }
-        for(let key in user){
-            data[index][key] = user[key];
-        }
-        fs.writeFile('MOCK_DATA.json',JSON.stringify(data),(err)=>{
-            if(err){
-                return res.status(404).json({error:"error while writting file"})
+    static updateMultipleDetails = async(req,res)=>{
+        const userId = req.params.id;
+        const {} = req.body;
+        try {
+            const isExist = await User.findOne({id:userId});
+            console.log("here");
+            if(!isExist){
+                throw new ApiError(404,"User not found");
             }
+            await User.updateOne({id:userId},{$set:{
+                id:id,
+                email:email,
+                first_name:first_name,
+                last_name:last_name
+            }})
             return res.status(200).json({
-                message:"user updated successfully",
+                message:"user updated successfully"
             })
-        })
+        } catch (error) {
+            throw new ApiError(500,"server error")
+        }
         
     } 
 
 // deleting user
-    static deleteUser = (req,res)=>{
+    static deleteUser = async(req,res)=>{
         const id = req.params.id;
-        const index = data.findIndex(index => index.id == id);
-        if(index === -1){
-            return res.status(404).json({ error: "User not found" });
-        }
-        data.splice(index, 1);
-        fs.writeFile('MOCK_DATA.json', JSON.stringify(data), (err) => {
-            if(err){
-                return res.status(404).json({ error: "Error while writing file" });
+        try {
+            const isExist = await User.findOne({ id:id })
+            if(!isExist){
+                throw new ApiError(404,"User not found");
             }
+            await User.deleteOne({id:id})
             return res.status(200).json({
-                message:"user delete successfully",
+                message:"user deleted successfully"
             })
-        })
+        } catch (error) {
+            throw new ApiError(500,"server error");
+        }
         
     }
 }

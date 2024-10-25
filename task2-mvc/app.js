@@ -9,7 +9,7 @@ const port = 3000;
 // middleware for geting data
 app.use(express.json())
 
-// app.use(express.urlencoded({ extended: true }))
+app.use(express.urlencoded({ extended: true }))
 
 
 // user router middleware

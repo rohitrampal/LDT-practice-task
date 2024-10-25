@@ -1,25 +1,18 @@
-// class ApiError extends Error {
-//     constructor(
-//         message = "error caught"
-//     ){
-//         super();
-//         // this.statusCode = statusCode;
-//         this.message = message
-//     }
-// }
+class ApiError extends Error{
+    constructor( statusCode, message='error encounter', error=[], stack='' ){
+        super(message);
+        this.statusCode = statusCode;
+        this.errors = error;
+        this.data = null;
+        this.success = false;
+        if(stack){
+            this.stack = stack;
+        }
+        else{
+            Error.captureStackTrace(this, this.constructor);
+        }
+    }
 
-
-// class ApiError{
-//     constructor(
-//         statusCode,
-//         message = "error caught"
-//     ){
-//         this.statusCode = statusCode;
-//         this.message = message;
-//     }
-// }
-
-ApiError = ( statusCode, message )=>{
-    
 }
+
 module.exports = ApiError
